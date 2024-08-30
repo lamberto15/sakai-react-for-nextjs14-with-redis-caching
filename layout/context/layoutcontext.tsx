@@ -1,17 +1,21 @@
 'use client';
 import React, { useState, createContext } from 'react';
 import { LayoutState, ChildContainerProps, LayoutConfig, LayoutContextProps } from '@/types';
+import useLocalStorageState,{LocalStorageState} from 'use-local-storage-state';
 export const LayoutContext = createContext({} as LayoutContextProps);
 
 export const LayoutProvider = ({ children }: ChildContainerProps) => {
-    const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
+    const [layoutConfig, setLayoutConfig] = useLocalStorageState('todos', {
+        defaultValue: {
             ripple: false,
             inputStyle: 'outlined',
             menuMode: 'static',
             colorScheme: 'light',
             theme: 'lara-light-indigo',
             scale: 14
+        }
     });
+  
 
     const [layoutState, setLayoutState] = useState<LayoutState>({
         staticMenuDesktopInactive: false,
