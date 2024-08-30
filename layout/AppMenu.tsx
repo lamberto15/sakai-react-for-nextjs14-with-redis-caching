@@ -1,6 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
-
-import React, { useContext } from 'react';
+import React, { Suspense, useContext } from 'react';
 import AppMenuitem from './AppMenuitem';
 import { LayoutContext } from './context/layoutcontext';
 import { MenuProvider } from './context/menucontext';
@@ -175,7 +173,7 @@ const AppMenu = () => {
         <MenuProvider>
             <ul className="layout-menu">
                 {model.map((item, i) => {
-                    return !item?.seperator ? <AppMenuitem item={item} root={true} index={i} key={item.label} /> : <li className="menu-separator"></li>;
+                    return !item?.seperator ? <Suspense key={i}><AppMenuitem item={item} root={true} index={i} key={item.label} /></Suspense> : <li className="menu-separator" key={i}></li>;
                 })}
 
                 <Link href="https://blocks.primereact.org" target="_blank" style={{ cursor: 'pointer' }}>

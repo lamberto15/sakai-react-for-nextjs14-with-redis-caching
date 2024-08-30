@@ -1,9 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-'use client';
-
-import { useRouter } from 'next/navigation';
-import { useEventListener, useMountEffect, useUnmountEffect } from 'primereact/hooks';
-import React, { useContext, useEffect, useRef } from 'react';
+"use client"
+import { useEventListener, useUnmountEffect } from 'primereact/hooks';
+import React, { Suspense, useCallback, useContext, useEffect, useRef } from 'react';
 import { classNames } from 'primereact/utils';
 import AppFooter from './AppFooter';
 import AppSidebar from './AppSidebar';
@@ -12,13 +9,14 @@ import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import { PrimeReactContext } from 'primereact/api';
 import { ChildContainerProps, LayoutState, AppTopbarRef } from '@/types';
-import { usePathname, useSearchParams } from 'next/navigation';
+import RouteChangeHandler from './RouteChangeHandler';
 
 const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
     const { setRipple } = useContext(PrimeReactContext);
     const topbarRef = useRef<AppTopbarRef>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
+
     const [bindMenuOutsideClickListener, unbindMenuOutsideClickListener] = useEventListener({
         type: 'click',
         listener: (event) => {
@@ -34,13 +32,6 @@ const Layout = ({ children }: ChildContainerProps) => {
             }
         }
     });
-
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    useEffect(() => {
-        hideMenu();
-        hideProfileMenu();
-    }, [pathname, searchParams]);
 
     const [bindProfileMenuOutsideClickListener, unbindProfileMenuOutsideClickListener] = useEventListener({
         type: 'click',
@@ -58,7 +49,7 @@ const Layout = ({ children }: ChildContainerProps) => {
         }
     });
 
-    const hideMenu = () => {
+    const hideMenu = useCallback(() => {
         setLayoutState((prevLayoutState: LayoutState) => ({
             ...prevLayoutState,
             overlayMenuActive: false,
@@ -67,15 +58,15 @@ const Layout = ({ children }: ChildContainerProps) => {
         }));
         unbindMenuOutsideClickListener();
         unblockBodyScroll();
-    };
+    }, [setLayoutState, unbindMenuOutsideClickListener]);
 
-    const hideProfileMenu = () => {
+    const hideProfileMenu = useCallback(() => {
         setLayoutState((prevLayoutState: LayoutState) => ({
             ...prevLayoutState,
             profileSidebarVisible: false
         }));
         unbindProfileMenuOutsideClickListener();
-    };
+    }, [setLayoutState, unbindProfileMenuOutsideClickListener]);
 
     const blockBodyScroll = (): void => {
         if (document.body.classList) {
@@ -122,8 +113,14 @@ const Layout = ({ children }: ChildContainerProps) => {
         'p-ripple-disabled': !layoutConfig.ripple
     });
 
+    const handleRouteChange = () => {
+        hideMenu();
+        hideProfileMenu();
+    };
+
     return (
         <React.Fragment>
+            <Suspense><RouteChangeHandler onRouteChange={handleRouteChange} /></Suspense>
             <div className={containerClass}>
                 <AppTopbar ref={topbarRef} />
                 <div ref={sidebarRef} className="layout-sidebar">
